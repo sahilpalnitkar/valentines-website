@@ -147,6 +147,28 @@
       color: white;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
+
+    @media (max-width: 768px) {
+      .container {
+        justify-content: flex-start;
+        padding-top: 1rem;
+      }
+
+      .run-button {
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
+      }
+
+      .run-button:hover:not(.clickable) {
+        transform: scale(1.02);
+      }
+
+      .run-button.clickable:hover {
+        transform: scale(1.08);
+      }
+    }
   </style>
 </head>
 <body>
@@ -204,6 +226,7 @@
 
       function moveButton() {
         if (isClickable) return;
+        RUN_BUTTON.style.position = 'fixed';
         const { x, y } = getRandomPosition();
         RUN_BUTTON.style.left = x + 'px';
         RUN_BUTTON.style.top = y + 'px';
@@ -226,8 +249,15 @@
 
       function checkProximityAndMove(clientX, clientY) {
         if (isClickable) return;
-        const btnLeft = parseFloat(RUN_BUTTON.style.left) || window.innerWidth / 2;
-        const btnTop = parseFloat(RUN_BUTTON.style.top) || window.innerHeight / 2;
+        let btnLeft, btnTop;
+        if (RUN_BUTTON.style.position === 'fixed' && RUN_BUTTON.style.left && RUN_BUTTON.style.top) {
+          btnLeft = parseFloat(RUN_BUTTON.style.left);
+          btnTop = parseFloat(RUN_BUTTON.style.top);
+        } else {
+          const rect = RUN_BUTTON.getBoundingClientRect();
+          btnLeft = rect.left + rect.width / 2;
+          btnTop = rect.top + rect.height / 2;
+        }
         const d = distance(clientX, clientY, btnLeft, btnTop);
         if (d < PROXIMITY_PX) moveButton();
       }
