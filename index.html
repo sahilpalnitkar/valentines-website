@@ -117,9 +117,43 @@
       50% { box-shadow: 0 4px 28px rgba(255, 20, 147, 0.7); }
     }
 
+    .cat-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cat-popup.visible {
+      display: flex;
+    }
+
+    .cat-popup img {
+      max-width: 80vw;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+    }
+
+    .cat-popup .do-it-again {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
   </style>
 </head>
 <body>
+  <div class="cat-popup" id="catPopup">
+    <img src="cat-mlem.png" alt="">
+    <span class="do-it-again">do it again</span>
+  </div>
   <div class="container">
     <h1 class="page-header">If you're a pretty girl that looks like this, click the button 😛</h1>
     <div class="image-wrapper">
@@ -141,7 +175,7 @@
 
       const ESCAPES_NEEDED = 5;
       const PROXIMITY_PX = 80;
-      const GOOGLE_DRIVE_LINK = 'https://drive.google.com/file/d/1eUKDHpV_qV4O6upuyDV7qBz1DebplEJb/view?usp=sharing';
+      const BUTTON_LINK = 'vid.mp4';
 
       let escapeCount = 0;
       let isClickable = false;
@@ -161,6 +195,13 @@
         return { x: Math.max(minX, Math.min(maxX, x)), y: Math.max(minY, Math.min(maxY, y)) };
       }
 
+      const CAT_POPUP = document.getElementById('catPopup');
+
+      function showCatPopup() {
+        CAT_POPUP.classList.add('visible');
+        setTimeout(function () { CAT_POPUP.classList.remove('visible'); }, 500);
+      }
+
       function moveButton() {
         if (isClickable) return;
         const { x, y } = getRandomPosition();
@@ -168,11 +209,12 @@
         RUN_BUTTON.style.top = y + 'px';
         RUN_BUTTON.style.transform = 'translate(-50%, -50%)';
         RUN_BUTTON.dataset.escapeCount = String(++escapeCount);
+        showCatPopup();
 
         if (escapeCount >= ESCAPES_NEEDED) {
           isClickable = true;
           RUN_BUTTON.classList.add('clickable');
-          RUN_BUTTON.href = GOOGLE_DRIVE_LINK;
+          RUN_BUTTON.href = BUTTON_LINK;
           RUN_BUTTON.target = '_blank';
           RUN_BUTTON.rel = 'noopener noreferrer';
         }
@@ -182,15 +224,21 @@
         return Math.hypot(x2 - x1, y2 - y1);
       }
 
-      document.addEventListener('mousemove', function (e) {
+      function checkProximityAndMove(clientX, clientY) {
         if (isClickable) return;
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
         const btnLeft = parseFloat(RUN_BUTTON.style.left) || window.innerWidth / 2;
         const btnTop = parseFloat(RUN_BUTTON.style.top) || window.innerHeight / 2;
-        const d = distance(mouseX, mouseY, btnLeft, btnTop);
+        const d = distance(clientX, clientY, btnLeft, btnTop);
         if (d < PROXIMITY_PX) moveButton();
+      }
+
+      document.addEventListener('mousemove', function (e) {
+        checkProximityAndMove(e.clientX, e.clientY);
       });
+
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches.length) checkProximityAndMove(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
 
       RUN_BUTTON.addEventListener('click', function (e) {
         if (!isClickable) e.preventDefault();
