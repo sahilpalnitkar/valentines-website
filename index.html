@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catch the Button</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #ffd6e0;
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .page-header {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #2d2d2d;
+      margin-bottom: 1.25rem;
+      text-align: center;
+      max-width: 90vw;
+      line-height: 1.4;
+    }
+
+    .image-wrapper {
+      display: flex;
+      gap: 0;
+      margin-bottom: 3rem;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      max-width: 90vw;
+    }
+
+    .image-wrapper .image-half {
+      flex: 1 1 50%;
+      overflow: hidden;
+    }
+
+    .image-wrapper .image-half img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-height: 60vh;
+      object-fit: cover;
+    }
+
+    .button-zone {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .run-button {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 1rem 2rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 12px;
+      background: #ff1493;
+      color: white;
+      box-shadow: 0 4px 20px rgba(255, 20, 147, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .run-button:hover:not(.clickable) {
+      transform: translate(-50%, -50%) scale(1.02);
+      box-shadow: 0 6px 28px rgba(255, 20, 147, 0.55);
+    }
+
+    .run-button.clickable {
+      cursor: pointer;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .run-button.clickable:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+      box-shadow: 0 8px 32px rgba(255, 20, 147, 0.65);
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(255, 20, 147, 0.45); }
+      50% { box-shadow: 0 4px 28px rgba(255, 20, 147, 0.7); }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="page-header">If you're a pretty girl that looks like this, click the button 😛</h1>
+    <div class="image-wrapper">
+      <div class="image-half">
+        <img src="pic1.png" alt="">
+      </div>
+      <div class="image-half">
+        <img src="pic2.png" alt="">
+      </div>
+    </div>
+    <div class="button-zone" id="buttonZone">
+      <a href="#" class="run-button" id="runButton" data-escape-count="0">Click Me! :)</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const RUN_BUTTON = document.getElementById('runButton');
+
+      const ESCAPES_NEEDED = 5;
+      const PROXIMITY_PX = 80;
+      const GOOGLE_DRIVE_LINK = 'https://drive.google.com/file/d/1eUKDHpV_qV4O6upuyDV7qBz1DebplEJb/view?usp=sharing';
+
+      let escapeCount = 0;
+      let isClickable = false;
+
+      function getRandomPosition() {
+        const btnW = RUN_BUTTON.offsetWidth;
+        const btnH = RUN_BUTTON.offsetHeight;
+        const padding = Math.max(20, btnW / 2 + 8, btnH / 2 + 8);
+        const minX = padding;
+        const maxX = window.innerWidth - padding;
+        const minY = padding;
+        const maxY = window.innerHeight - padding;
+
+        // Random position anywhere on the page (viewport)
+        const x = minX + Math.random() * (maxX - minX);
+        const y = minY + Math.random() * (maxY - minY);
+        return { x: Math.max(minX, Math.min(maxX, x)), y: Math.max(minY, Math.min(maxY, y)) };
+      }
+
+      function moveButton() {
+        if (isClickable) return;
+        const { x, y } = getRandomPosition();
+        RUN_BUTTON.style.left = x + 'px';
+        RUN_BUTTON.style.top = y + 'px';
+        RUN_BUTTON.style.transform = 'translate(-50%, -50%)';
+        RUN_BUTTON.dataset.escapeCount = String(++escapeCount);
+
+        if (escapeCount >= ESCAPES_NEEDED) {
+          isClickable = true;
+          RUN_BUTTON.classList.add('clickable');
+          RUN_BUTTON.href = GOOGLE_DRIVE_LINK;
+          RUN_BUTTON.target = '_blank';
+          RUN_BUTTON.rel = 'noopener noreferrer';
+        }
+      }
+
+      function distance(x1, y1, x2, y2) {
+        return Math.hypot(x2 - x1, y2 - y1);
+      }
+
+      document.addEventListener('mousemove', function (e) {
+        if (isClickable) return;
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const btnLeft = parseFloat(RUN_BUTTON.style.left) || window.innerWidth / 2;
+        const btnTop = parseFloat(RUN_BUTTON.style.top) || window.innerHeight / 2;
+        const d = distance(mouseX, mouseY, btnLeft, btnTop);
+        if (d < PROXIMITY_PX) moveButton();
+      });
+
+      RUN_BUTTON.addEventListener('click', function (e) {
+        if (!isClickable) e.preventDefault();
+      });
+    })();
+  </script>
+</body>
+</html>
